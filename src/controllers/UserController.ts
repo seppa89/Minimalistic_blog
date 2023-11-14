@@ -19,8 +19,18 @@ const UserController = {
 
 		try {
 			const user = new User({ username, password });
-			user.save();
-			res.json({ success: true, message: 'User registered successfully.' });
+			return user
+				.save()
+				.then(() => {
+					res.json({ success: true, message: 'User registered successfully.' });
+				})
+				.catch(error => {
+					if (error.code === 11000) {
+						return res
+							.status(409)
+							.json({ success: false, message: 'Username is Taken' });
+					}
+				});
 		} catch (error) {
 			res.status(500).json({ success: false, message: 'Registration failed.' });
 		}
