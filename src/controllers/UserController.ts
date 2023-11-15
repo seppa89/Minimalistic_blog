@@ -20,7 +20,7 @@ const UserController = {
 
 		try {
 			// @ts-ignore
-			return User.register({ username, password }, password, (err, user) => {
+			return User.register({ username }, password, (err, user) => {
 				if (err) {
 					if (err.name === 'UserExistsError') {
 						return res.status(401).json({
