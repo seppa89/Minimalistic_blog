@@ -4,6 +4,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import session from 'express-session';
 import userRouter from './routes/users';
+import postRouter from './routes/posts';
 import passport from 'passport';
 import User from './models/User';
 
@@ -33,6 +34,7 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 app.use('/api/users', userRouter);
+app.use('/api/posts', postRouter);
 
 mongoose
 	.connect(env.MONGODB_URI)
