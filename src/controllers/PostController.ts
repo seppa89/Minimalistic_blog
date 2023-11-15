@@ -15,6 +15,7 @@ const PostController = {
 	getPostById: async (req: Request<{ postId: string }>, res: Response) => {
 		try {
 			const post = await Post.findById(req.params.postId);
+			console.log(post);
 			res.json(post);
 		} catch (error) {
 			res.status(500).json({ error: 'Internal Server Error' });
@@ -52,6 +53,9 @@ const PostController = {
 		res: Response
 	) => {
 		const { title, content } = req.body;
+
+		console.log(req.body);
+		console.log(req.params);
 		if (!title || !content) {
 			return res
 				.status(400)
@@ -62,14 +66,16 @@ const PostController = {
 			await Post.findByIdAndUpdate(req.params.postId, { title, content });
 			res.json({ success: true, message: 'Post updated successfully.' });
 		} catch (error) {
+			console.log(error);
 			res.status(500).json({ success: false, message: 'Post update failed.' });
 		}
 	},
 	deletePost: async (req: Request<{ postId: string }>, res: Response) => {
 		try {
-			await Post.findByIdAndRemove(req.params.postId);
+			await Post.findByIdAndDelete(req.params.postId);
 			res.json({ success: true, message: 'Post deleted successfully.' });
 		} catch (error) {
+			console.log(error);
 			res
 				.status(500)
 				.json({ success: false, message: 'Post deletion failed.' });
