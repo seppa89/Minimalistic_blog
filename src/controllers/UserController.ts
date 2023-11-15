@@ -12,7 +12,7 @@ const UserController = {
 		const password = req.body?.password;
 
 		if (!username || !password) {
-			return res.status(401).json({
+			return res.status(400).json({
 				message: 'Username and password are required',
 				success: false,
 			});
