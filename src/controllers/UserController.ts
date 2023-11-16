@@ -7,11 +7,7 @@ const UserController = {
 		req: Request<{}, {}, { username: string; password: string }>,
 		res: Response<{ message: string; success: boolean }>
 	) => {
-		console.log(req.body);
-		const username = req.body?.username;
-		const password = req.body?.password;
-
-		if (!username || !password) {
+		if (!req.body.username || !req.body.password) {
 			return res.status(400).json({
 				message: 'Username and password are required',
 				success: false,
@@ -19,31 +15,41 @@ const UserController = {
 		}
 
 		try {
-			// @ts-ignore
-			return User.register({ username }, password, (err, user) => {
-				if (err) {
-					if (err.name === 'UserExistsError') {
-						return res.status(401).json({
-							message: 'A user with the given username is already registered',
+			User.register(
+				new User({ username: req.body.username }),
+				req.body.password,
+				(err, user) => {
+					if (err) {
+						return res.json({
 							success: false,
+							message: 'Your account could not be saved. Error: ' + err,
 						});
-					} else {
-						return res
-							.status(401)
-							.json({ message: 'Unauthorized', success: false });
 					}
-				} else {
-					passport.authenticate('local')(req, res, () => {
-						return res.json({ message: 'Authorized', success: true });
+					const authenticate = User.authenticate();
+
+					authenticate(req.body.username, req.body.password, (err, user) => {
+						if (err) {
+							return res
+								.status(401)
+								.json({ message: 'Not Auth', success: false });
+						} else {
+							return res.status(200).json({ message: 'Auth', success: true });
+						}
 					});
 				}
+			);
+		} catch (err) {
+			return res.json({
+				success: false,
+				message: 'Your account could not be saved. Error: ' + err,
 			});
-		} catch (error) {
-			res.status(500).json({ success: false, message: 'Registration failed.' });
 		}
 	},
-	login: (req: Request, res: Response) => {
-		res.json({ message: 'Authenticated', success: true });
+	login: (
+		req: Request<any, any, { password: string; username: string }>,
+		res: Response
+	) => {
+		res.status(200).json({ messagge: 'Auth', user: req.user?._id });
 	},
 	logout: (req: Request, res: Response, next: NextFunction) => {
 		req.logout(err => {
@@ -52,6 +58,18 @@ const UserController = {
 			}
 			res.json({ message: 'Success logout', success: true });
 		});
+	},
+	checkSession: (req: Request, res: Response) => {
+		if (req.isAuthenticated()) {
+			res.json({
+				message: 'You made it to the secured profie',
+				user: req.user.username,
+			});
+		} else {
+			res
+				.status(401)
+				.json({ message: 'You are not authenticated', success: false });
+		}
 	},
 };
 
