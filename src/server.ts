@@ -14,31 +14,49 @@ const PORT = env.PORT;
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+	res.setHeader('Access-Control-Allow-Origin', env.CLIENT_DOMAIN);
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+	res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+	res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+	next();
+});
 
 app.use(
 	session({
 		secret: env.SESSION_SECRET,
 		resave: false,
 		saveUninitialized: false,
+		cookie: {
+			maxAge: 1000 * 60 * 60,
+		},
 	})
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 passport.use(User.createStrategy());
 
-// @ts-ignore
+//@ts-ignore
 passport.serializeUser(User.serializeUser());
-
 passport.deserializeUser(User.deserializeUser());
 
 app.use('/api/users', userRouter);
 app.use('/api/posts', postRouter);
 app.use('/api/comments', commentRouter);
 app.use('/api/votes', votesRouter);
+
+app.use(async (req, res) => {
+	if (req.method === 'OPTIONS') {
+		return res.sendStatus(200);
+	}
+	res.status(404).json({ message: 'Not found' });
+});
 
 mongoose
 	.connect(env.MONGODB_URI)
