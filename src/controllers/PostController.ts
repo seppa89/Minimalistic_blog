@@ -4,7 +4,10 @@ import Post from '../models/Post';
 const PostController = {
 	getAllPosts: async (req: Request, res: Response) => {
 		try {
-			const posts = await Post.find();
+			const posts = await Post.find().populate(
+				'author',
+				'select username -_id'
+			);
 			res.json(posts);
 		} catch (error) {
 			res
@@ -34,6 +37,8 @@ const PostController = {
 		} else if (!req.user) {
 			return res.status(401).json({ message: 'Unauthoriezed', success: false });
 		}
+
+		console.log(req.user);
 
 		try {
 			const newPost = new Post({ title, content, author: req?.user?._id });
