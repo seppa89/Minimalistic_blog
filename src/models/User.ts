@@ -1,7 +1,7 @@
 import mongoose, { Document, PassportLocalModel, Schema } from 'mongoose';
 import passportLocalMongoose from 'passport-local-mongoose';
 
-interface UserDocument extends Document {
+export interface UserDocument extends Document {
 	username: string;
 }
 
