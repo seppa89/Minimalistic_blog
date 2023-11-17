@@ -110,12 +110,21 @@ const UserController = {
 			)(req, res, next),
 	],
 	logout: (req: Request, res: Response, next: NextFunction) => {
+		if (!req.user) {
+			return res.status(401).json({
+				success: false,
+				error: "User is not authorized. Can't logout",
+			});
+		}
 		req.logout(err => {
 			if (err) {
 				return next(err);
 			}
-			res.json({ message: 'Success logout', success: true });
 		});
+
+		res
+			.clearCookie('connect.sid')
+			.json({ message: 'Success logout', success: true });
 	},
 	checkSession: (req: Request, res: Response) => {
 		if (req.isAuthenticated()) {
@@ -124,7 +133,7 @@ const UserController = {
 				user: req.user.username,
 			});
 		} else {
-			res.status(401).json({ message: 'User unauthorized', success: false });
+			res.status(401).json({ error: 'User unauthorized', success: false });
 		}
 	},
 };
