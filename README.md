@@ -1,4 +1,4 @@
-# RESTFull-API-blog
+# REST API blog
 
 Stack:
 
